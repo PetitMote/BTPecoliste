@@ -3,6 +3,13 @@
 # and also to reproject the coordinates.
 
 from django.contrib.gis.db import models
+from BTPecoliste.settings import BTP_ECOLISTE_SETTINGS
+from django.core.exceptions import ValidationError
+
+
+def validate_material_origin(value):
+    if not value in BTP_ECOLISTE_SETTINGS["material_origins"]:
+        raise ValidationError(f"Origine du matériau incorrecte, choisir parmi {BTP_ECOLISTE_SETTINGS['material_origins']}")
 
 
 class Enterprise(models.Model):
@@ -55,8 +62,8 @@ class MaterialType(models.Model):
     Defines the usages of the materials (insulation, beam...).
     """
     category = models.ForeignKey(MaterialTypeCategory, on_delete=models.SET_NULL, null=True,
-                                 verbose_name="Catégorie d'usage", related_name="usages")
-    name = models.CharField("Usage de matériaux", max_length=200, null=False)
+                                 verbose_name="Catégorie de typologie", related_name="usages")
+    name = models.CharField("Typologie de matériaux", max_length=200, null=False)
     order = models.PositiveSmallIntegerField("Ordre d'affichage", null=False, default=99)
 
     def __str__(self):
@@ -72,10 +79,10 @@ class MaterialByEnterprise(models.Model):
     enterprise = models.ForeignKey(Enterprise, on_delete=models.CASCADE, verbose_name="Entreprise",
                                    related_name="materials_producted")
     type = models.ForeignKey(MaterialType, on_delete=models.CASCADE, verbose_name="Usage", related_name="products")
-    origin = models.CharField("Origine", max_length=50, null=False)
+    origin = models.CharField("Origine", max_length=50, null=False, validators=[validate_material_origin])
 
     def __str__(self):
-        return f"{self.type} produit par {self.enterprise}"
+        return f"{self.type} {self.origin} produit par {self.enterprise}"
 
 
 class MaterialProductionAddress(models.Model):
@@ -115,7 +122,8 @@ class LinkBiobasedMaterial(models.Model):
 
 
 class Contact(models.Model):
-    enterprise = models.ForeignKey(Enterprise, on_delete=models.CASCADE, verbose_name="Entreprise", related_name="contacts")
+    enterprise = models.ForeignKey(Enterprise, on_delete=models.CASCADE, verbose_name="Entreprise",
+                                   related_name="contacts")
     firstname = models.CharField("Prénom", max_length=50, null=False)
     surname = models.CharField("Nom de famille", max_length=50, null=False)
     description = models.TextField("Description", max_length=200)

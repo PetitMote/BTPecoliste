@@ -9,88 +9,260 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Address',
+            name="Address",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('text_version', models.CharField(max_length=400, verbose_name='Adresse textuelle')),
-                ('geolocation', django.contrib.gis.db.models.fields.PointField(geography=True, srid=4326, verbose_name='Coordonnées')),
-                ('is_production', models.BooleanField(verbose_name='Est un lieu de production')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "text_version",
+                    models.CharField(max_length=400, verbose_name="Adresse textuelle"),
+                ),
+                (
+                    "geolocation",
+                    django.contrib.gis.db.models.fields.PointField(
+                        geography=True, srid=4326, verbose_name="Coordonnées"
+                    ),
+                ),
+                (
+                    "is_production",
+                    models.BooleanField(verbose_name="Est un lieu de production"),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='BiobasedOriginMaterial',
+            name="BiobasedOriginMaterial",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=50, verbose_name='Nom')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=50, verbose_name="Nom")),
             ],
         ),
         migrations.CreateModel(
-            name='Enterprise',
+            name="Enterprise",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=200, verbose_name='Nom')),
-                ('website', models.URLField(blank=True, verbose_name='Site web')),
-                ('description', models.TextField(blank=True, max_length=1000, verbose_name='Description')),
-                ('annual_sales', models.PositiveIntegerField(blank=True, null=True, verbose_name="Chiffre d'affaires")),
-                ('n_employees', models.PositiveIntegerField(blank=True, null=True, verbose_name="Nombre d'employés")),
-                ('added', models.DateField(auto_now_add=True, verbose_name="Date d'ajout")),
-                ('updated', models.DateField(auto_now=True, verbose_name='Date de mise à jour')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=200, verbose_name="Nom")),
+                ("website", models.URLField(blank=True, verbose_name="Site web")),
+                (
+                    "description",
+                    models.TextField(
+                        blank=True, max_length=1000, verbose_name="Description"
+                    ),
+                ),
+                (
+                    "annual_sales",
+                    models.PositiveIntegerField(
+                        blank=True, null=True, verbose_name="Chiffre d'affaires"
+                    ),
+                ),
+                (
+                    "n_employees",
+                    models.PositiveIntegerField(
+                        blank=True, null=True, verbose_name="Nombre d'employés"
+                    ),
+                ),
+                (
+                    "added",
+                    models.DateField(auto_now_add=True, verbose_name="Date d'ajout"),
+                ),
+                (
+                    "updated",
+                    models.DateField(auto_now=True, verbose_name="Date de mise à jour"),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='MaterialByEnterprise',
+            name="MaterialByEnterprise",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('origin', models.CharField(max_length=50, verbose_name='Origine')),
-                ('enterprise', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='materials_producted', to='ecoliste.enterprise', verbose_name='Entreprise')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("origin", models.CharField(max_length=50, verbose_name="Origine")),
+                (
+                    "enterprise",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="materials_producted",
+                        to="ecoliste.enterprise",
+                        verbose_name="Entreprise",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='MaterialTypeCategory',
+            name="MaterialTypeCategory",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=200, verbose_name='Nom de la catégorie')),
-                ('order', models.PositiveSmallIntegerField(default=99, verbose_name="Ordre d'affichage")),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "name",
+                    models.CharField(
+                        max_length=200, verbose_name="Nom de la catégorie"
+                    ),
+                ),
+                (
+                    "order",
+                    models.PositiveSmallIntegerField(
+                        default=99, verbose_name="Ordre d'affichage"
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='MaterialType',
+            name="MaterialType",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=200, verbose_name='Usage de matériaux')),
-                ('order', models.PositiveSmallIntegerField(default=99, verbose_name="Ordre d'affichage")),
-                ('category', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='usages', to='ecoliste.materialtypecategory', verbose_name="Catégorie d'usage")),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "name",
+                    models.CharField(max_length=200, verbose_name="Usage de matériaux"),
+                ),
+                (
+                    "order",
+                    models.PositiveSmallIntegerField(
+                        default=99, verbose_name="Ordre d'affichage"
+                    ),
+                ),
+                (
+                    "category",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="usages",
+                        to="ecoliste.materialtypecategory",
+                        verbose_name="Catégorie d'usage",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='MaterialProductionAddress',
+            name="MaterialProductionAddress",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('address', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='materials', to='ecoliste.address', verbose_name='Addresse de production')),
-                ('material', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='production_addresses', to='ecoliste.materialbyenterprise', verbose_name='Matériau')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "address",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="materials",
+                        to="ecoliste.address",
+                        verbose_name="Addresse de production",
+                    ),
+                ),
+                (
+                    "material",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="production_addresses",
+                        to="ecoliste.materialbyenterprise",
+                        verbose_name="Matériau",
+                    ),
+                ),
             ],
         ),
         migrations.AddField(
-            model_name='materialbyenterprise',
-            name='type',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='products', to='ecoliste.materialtype', verbose_name='Usage'),
+            model_name="materialbyenterprise",
+            name="type",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="products",
+                to="ecoliste.materialtype",
+                verbose_name="Usage",
+            ),
         ),
         migrations.CreateModel(
-            name='LinkBiobasedMaterial',
+            name="LinkBiobasedMaterial",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('biobased_origin', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='based_materials', to='ecoliste.biobasedoriginmaterial', verbose_name='Origine biosourcée')),
-                ('material', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='biobased_origins', to='ecoliste.materialbyenterprise', verbose_name="Matériau de l'entreprise")),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "biobased_origin",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="based_materials",
+                        to="ecoliste.biobasedoriginmaterial",
+                        verbose_name="Origine biosourcée",
+                    ),
+                ),
+                (
+                    "material",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="biobased_origins",
+                        to="ecoliste.materialbyenterprise",
+                        verbose_name="Matériau de l'entreprise",
+                    ),
+                ),
             ],
         ),
         migrations.AddField(
-            model_name='address',
-            name='enterprise',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='addresses', to='ecoliste.enterprise', verbose_name='Entreprise'),
+            model_name="address",
+            name="enterprise",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="addresses",
+                to="ecoliste.enterprise",
+                verbose_name="Entreprise",
+            ),
         ),
     ]

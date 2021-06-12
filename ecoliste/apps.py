@@ -2,5 +2,5 @@ from django.apps import AppConfig
 
 
 class EcolisteConfig(AppConfig):
-    default_auto_field = 'django.db.models.BigAutoField'
-    name = 'ecoliste'
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "ecoliste"

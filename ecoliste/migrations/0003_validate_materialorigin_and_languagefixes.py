@@ -8,23 +8,35 @@ import ecoliste.models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('ecoliste', '0002_contacts'),
+        ("ecoliste", "0002_contacts"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='materialbyenterprise',
-            name='origin',
-            field=models.CharField(max_length=50, validators=[ecoliste.models.validate_material_origin], verbose_name='Origine'),
+            model_name="materialbyenterprise",
+            name="origin",
+            field=models.CharField(
+                max_length=50,
+                validators=[ecoliste.models.validate_material_origin],
+                verbose_name="Origine",
+            ),
         ),
         migrations.AlterField(
-            model_name='materialtype',
-            name='category',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='usages', to='ecoliste.materialtypecategory', verbose_name='Catégorie de typologie'),
+            model_name="materialtype",
+            name="category",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="usages",
+                to="ecoliste.materialtypecategory",
+                verbose_name="Catégorie de typologie",
+            ),
         ),
         migrations.AlterField(
-            model_name='materialtype',
-            name='name',
-            field=models.CharField(max_length=200, verbose_name='Typologie de matériaux'),
+            model_name="materialtype",
+            name="name",
+            field=models.CharField(
+                max_length=200, verbose_name="Typologie de matériaux"
+            ),
         ),
     ]

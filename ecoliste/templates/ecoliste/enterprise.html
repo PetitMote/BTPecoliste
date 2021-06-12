@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ page_title }}</title>
+</head>
+<body>
+<h1>Fiche d'identité</h1>
+<ul>
+    <li>Nom : {{ enterprise.name }}</li>
+    <li>Site internet : <a href="{{ enterprise.website }}">{{ enterprise.website }}</a></li>
+    <li>Description : {{ enterprise.description }}</li>
+    <li>Chiffre d'affaires : {{ enterprise.annual_sales }}</li>
+    <li>Nombre d'employés : {{ enterprise.n_employees }}</li>
+    <li>Créée : {{ enterprise.added }}</li>
+    <li>Modifiée : {{ enterprise.updated }}</li>
+</ul>
+
+<h1>Adresses :</h1>
+{% if addresses %}
+    <ul>
+        {% for address in addresses %}
+            <li>{{ address.text_version }}</li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>Pas d'adresse renseignée</p>
+{% endif %}
+</body>
+</html>

@@ -13,6 +13,15 @@ class Enterprise(models.Model):
     All the structure depends on this model, as everything links to it.
     """
 
+    class NEmployees(models.IntegerChoices):
+        INDIVIDUAL = 1, "1"
+        MICRO = 2, "2 - 9"
+        SMALL = 10, "10 - 49"
+        MEDIUM = 50, "50 - 249"
+        MIDSIZE1 = 250, "250 - 999"
+        MIDSIZE2 = 1000, "1000 - 4999"
+        BIG = 5000, "5000+"
+
     name = models.CharField(_("Nom"), max_length=200, null=False)
     website = models.URLField(_("Site web"), max_length=200, null=False, blank=True)
     description = models.TextField(
@@ -22,7 +31,7 @@ class Enterprise(models.Model):
         _("Chiffre d'affaires"), null=True, blank=True
     )
     n_employees = models.PositiveIntegerField(
-        _("Nombre d'employés"), null=True, blank=True
+        _("Nombre d'employés"), choices=NEmployees.choices, null=True, blank=True
     )
     added = models.DateField(_("Date d'ajout"), auto_now_add=True)
     updated = models.DateField(_("Date de mise à jour"), auto_now=True)

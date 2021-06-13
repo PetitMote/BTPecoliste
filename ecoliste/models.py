@@ -22,13 +22,21 @@ class Enterprise(models.Model):
         MIDSIZE2 = 1000, "1000 - 4999"
         BIG = 5000, "5000+"
 
+    class AnnualSales(models.IntegerChoices):
+        MICRO = 1, _("< 2 millions €")
+        SMALL = 2, _("2 à 10 millions €")
+        MEDIUM = 3, _("10 à 50 millions €")
+        INTERSIZE1 = 4, _("50 à 200 millions €")
+        INTERSIZE2 = 5, _("200 à 1500 millions €")
+        BIG = 6, _("> 1500 millions €")
+
     name = models.CharField(_("Nom"), max_length=200, null=False)
     website = models.URLField(_("Site web"), max_length=200, null=False, blank=True)
     description = models.TextField(
         _("Description"), max_length=1000, null=False, blank=True
     )
     annual_sales = models.PositiveIntegerField(
-        _("Chiffre d'affaires"), null=True, blank=True
+        _("Chiffre d'affaires"), choices=AnnualSales.choices, null=True, blank=True
     )
     n_employees = models.PositiveIntegerField(
         _("Nombre d'employés"), choices=NEmployees.choices, null=True, blank=True

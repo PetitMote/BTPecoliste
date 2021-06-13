@@ -3,15 +3,7 @@
 # and also to reproject the coordinates.
 
 from django.contrib.gis.db import models
-from BTPecoliste.settings import BTP_ECOLISTE_SETTINGS
-from django.core.exceptions import ValidationError
-
-
-def validate_material_origin(value):
-    if not value in BTP_ECOLISTE_SETTINGS["material_origins"]:
-        raise ValidationError(
-            f"Origine du matériau incorrecte, choisir parmi {BTP_ECOLISTE_SETTINGS['material_origins']}"
-        )
+from django.utils.translation import gettext_lazy as _
 
 
 class Enterprise(models.Model):
@@ -21,19 +13,19 @@ class Enterprise(models.Model):
     All the structure depends on this model, as everything links to it.
     """
 
-    name = models.CharField("Nom", max_length=200, null=False)
-    website = models.URLField("Site web", max_length=200, null=False, blank=True)
+    name = models.CharField(_("Nom"), max_length=200, null=False)
+    website = models.URLField(_("Site web"), max_length=200, null=False, blank=True)
     description = models.TextField(
-        "Description", max_length=1000, null=False, blank=True
+        _("Description"), max_length=1000, null=False, blank=True
     )
     annual_sales = models.PositiveIntegerField(
-        "Chiffre d'affaires", null=True, blank=True
+        _("Chiffre d'affaires"), null=True, blank=True
     )
     n_employees = models.PositiveIntegerField(
-        "Nombre d'employés", null=True, blank=True
+        _("Nombre d'employés"), null=True, blank=True
     )
-    added = models.DateField("Date d'ajout", auto_now_add=True)
-    updated = models.DateField("Date de mise à jour", auto_now=True)
+    added = models.DateField(_("Date d'ajout"), auto_now_add=True)
+    updated = models.DateField(_("Date de mise à jour"), auto_now=True)
 
     def __str__(self):
         return self.name
@@ -49,12 +41,12 @@ class Address(models.Model):
     enterprise = models.ForeignKey(
         Enterprise,
         on_delete=models.CASCADE,
-        verbose_name="Entreprise",
+        verbose_name=_("Entreprise"),
         related_name="addresses",
     )
-    text_version = models.CharField("Adresse textuelle", max_length=400, null=False)
-    geolocation = models.PointField("Coordonnées", geography=True, null=False)
-    is_production = models.BooleanField("Est un lieu de production")
+    text_version = models.CharField(_("Adresse textuelle"), max_length=400, null=False)
+    geolocation = models.PointField(_("Coordonnées"), geography=True, null=False)
+    is_production = models.BooleanField(_("Est un lieu de production"))
 
     def __str__(self):
         return self.text_version
@@ -65,9 +57,9 @@ class MaterialTypeCategory(models.Model):
     These categories are used to regroup Material Types.
     """
 
-    name = models.CharField("Nom de la catégorie", max_length=200, null=False)
+    name = models.CharField(_("Nom de la catégorie"), max_length=200, null=False)
     order = models.PositiveSmallIntegerField(
-        "Ordre d'affichage", null=False, default=99
+        _("Ordre d'affichage"), null=False, default=99
     )
 
     def __str__(self):
@@ -83,12 +75,12 @@ class MaterialType(models.Model):
         MaterialTypeCategory,
         on_delete=models.SET_NULL,
         null=True,
-        verbose_name="Catégorie de typologie",
+        verbose_name=_("Catégorie de typologie"),
         related_name="usages",
     )
-    name = models.CharField("Typologie de matériaux", max_length=200, null=False)
+    name = models.CharField(_("Typologie de matériaux"), max_length=200, null=False)
     order = models.PositiveSmallIntegerField(
-        "Ordre d'affichage", null=False, default=99
+        _("Ordre d'affichage"), null=False, default=99
     )
 
     def __str__(self):
@@ -102,24 +94,34 @@ class MaterialByEnterprise(models.Model):
     These materials have a type (for their usage), but also an origin. This last one defines why they are "ecological".
     """
 
+    class MaterialOrigins(models.IntegerChoices):
+        REUSE = 1, _("De réemploi")
+        BIOBASED = 2, _("Biosourcé")
+        RECYCLED = 3, _("Recyclé")
+        REUSABLE = 4, _("Réutilisable")
+
     enterprise = models.ForeignKey(
         Enterprise,
         on_delete=models.CASCADE,
-        verbose_name="Entreprise",
-        related_name="materials_producted",
+        verbose_name=_("Entreprise"),
+        related_name=_("materials_producted"),
     )
     type = models.ForeignKey(
         MaterialType,
         on_delete=models.CASCADE,
-        verbose_name="Usage",
+        verbose_name=_("Typologie"),
         related_name="products",
     )
-    origin = models.CharField(
-        "Origine", max_length=50, null=False, validators=[validate_material_origin]
+    origin = models.PositiveSmallIntegerField(
+        _("Origine"),
+        choices=MaterialOrigins.choices,
+        null=False,
     )
 
     def __str__(self):
-        return f"{self.type} {self.origin} produit par {self.enterprise}"
+        return _("{type} {origin} produit par {enterprise}").format(
+            type=self.type, origin=self.origin, enterprise=self.enterprise
+        )
 
 
 class MaterialProductionAddress(models.Model):
@@ -130,18 +132,20 @@ class MaterialProductionAddress(models.Model):
     material = models.ForeignKey(
         MaterialByEnterprise,
         on_delete=models.CASCADE,
-        verbose_name="Matériau",
+        verbose_name=_("Matériau"),
         related_name="production_addresses",
     )
     address = models.ForeignKey(
         Address,
         on_delete=models.CASCADE,
-        verbose_name="Addresse de production",
+        verbose_name=_("Addresse de production"),
         related_name="materials",
     )
 
     def __str__(self):
-        return f"{self.material} à {self.address}"
+        return _("{material} à {address}").format(
+            material=self.material, address=self.address
+        )
 
 
 class BiobasedOriginMaterial(models.Model):
@@ -149,7 +153,7 @@ class BiobasedOriginMaterial(models.Model):
     Based materials / origins for the biobased materials (wood, straw...).
     """
 
-    name = models.CharField("Nom", max_length=50, null=False)
+    name = models.CharField(_("Nom"), max_length=50, null=False)
 
     def __str__(self):
         return self.name
@@ -163,33 +167,37 @@ class LinkBiobasedMaterial(models.Model):
     material = models.ForeignKey(
         MaterialByEnterprise,
         on_delete=models.CASCADE,
-        verbose_name="Matériau de l'entreprise",
+        verbose_name=_("Matériau de l'entreprise"),
         related_name="biobased_origins",
     )
     biobased_origin = models.ForeignKey(
         BiobasedOriginMaterial,
         on_delete=models.CASCADE,
-        verbose_name="Origine biosourcée",
+        verbose_name=_("Origine biosourcée"),
         related_name="based_materials",
     )
 
     def __str__(self):
-        return f"{self.material} en {self.biobased_origin}"
+        return _("{material} en {biobased_origin}").format(
+            material=self.material, biobased_origin=self.biobased_origin
+        )
 
 
 class Contact(models.Model):
     enterprise = models.ForeignKey(
         Enterprise,
         on_delete=models.CASCADE,
-        verbose_name="Entreprise",
+        verbose_name=_("Entreprise"),
         related_name="contacts",
     )
-    firstname = models.CharField("Prénom", max_length=50, null=False)
-    surname = models.CharField("Nom de famille", max_length=50, null=False)
-    description = models.TextField("Description", max_length=200)
-    phone1 = models.CharField("Téléphone 1", max_length=25)
-    phone2 = models.CharField("Téléphone 2", max_length=25)
-    mail = models.EmailField("Adresse mail")
+    firstname = models.CharField(_("Prénom"), max_length=50, null=False)
+    surname = models.CharField(_("Nom de famille"), max_length=50, null=False)
+    description = models.TextField(_("Description"), max_length=200)
+    phone1 = models.CharField(_("Téléphone 1"), max_length=25)
+    phone2 = models.CharField(_("Téléphone 2"), max_length=25)
+    mail = models.EmailField(_("Adresse mail"))
 
     def __str__(self):
-        return f"{self.firstname} {self.surname}"
+        return _("{firstname} {surname}").format(
+            firstname=self.firstname, surname=self.surname
+        )

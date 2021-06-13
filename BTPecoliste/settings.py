@@ -126,7 +126,3 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 INTERNAL_IPS = [
     "127.0.0.1",
 ]
-
-BTP_ECOLISTE_SETTINGS = {
-    "material_origins": ("De réemploi", "Biosourcé", "Recyclé", "Réutilisable")
-}

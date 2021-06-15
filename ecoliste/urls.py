@@ -5,6 +5,8 @@ from . import views
 
 app_name = "ecoliste"
 urlpatterns = [
-    path(_(""), views.search_page, name="search"),
-    path(_("entreprise/<int:enterprise_id>/"), views.enterprise, name="enterprise"),
+    path(_(""), views.search_view, name="search"),
+    path(
+        _("entreprise/<int:enterprise_id>/"), views.enterprise_view, name="enterprise"
+    ),
 ]

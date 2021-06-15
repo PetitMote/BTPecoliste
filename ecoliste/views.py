@@ -1,21 +1,39 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse
-from django.http import Http404
-
-# Create your views here.
-from .models import Enterprise, Address
+from .models import Enterprise, MaterialTypeCategory, MaterialType
 
 
-def search_page(request):
+def search_view(request):
     return HttpResponse("Page de recherche de matériaux")
 
 
-def enterprise(request, enterprise_id):
+def enterprise_view(request, enterprise_id):
     enterprise = get_object_or_404(Enterprise, pk=enterprise_id)
-    addresses = Address.objects.filter(enterprise=enterprise)
+    addresses = enterprise.addresses.all()
+    contacts = enterprise.contacts.all()
+
+    materials = (
+        enterprise.products.all()
+        .select_related("type", "type__category", "origin")
+        .prefetch_related("address")
+    )
+    types = {}
+    for material in materials:
+        if material.type in types.keys():
+            types[material.type].append(material)
+        else:
+            types[material.type] = [material]
+    materials_categorised = {}
+    for type in types.keys():
+        if type.category in materials_categorised.keys():
+            materials_categorised[type.category][type] = types[type]
+        else:
+            materials_categorised[type.category] = {type: types[type]}
+
     context = {
-        "page_title": enterprise.name,
         "enterprise": enterprise,
         "addresses": addresses,
+        "materials": materials_categorised,
+        "contacts": contacts
     }
     return render(request, "ecoliste/enterprise.html", context)

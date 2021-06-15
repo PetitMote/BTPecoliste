@@ -13,6 +13,11 @@ class Enterprise(models.Model):
     All the structure depends on this model, as everything links to it.
     """
 
+    class Meta:
+        verbose_name = _("Entreprise")
+        verbose_name_plural = _("Entreprises")
+        ordering = ["name"]
+
     class NEmployees(models.IntegerChoices):
         INDIVIDUAL = 1, "1"
         MICRO = 2, "2 - 9"
@@ -30,16 +35,31 @@ class Enterprise(models.Model):
         INTERSIZE2 = 5, _("200 à 1500 millions €")
         BIG = 6, _("> 1500 millions €")
 
-    name = models.CharField(_("Nom"), max_length=200, null=False)
-    website = models.URLField(_("Site web"), max_length=200, null=False, blank=True)
+    name = models.CharField(_("Nom"), max_length=200, null=False, db_index=True)
+    website = models.URLField(
+        _("Site web"),
+        max_length=200,
+        null=False,
+        blank=True,
+        unique=True,
+        db_index=True,
+    )
     description = models.TextField(
         _("Description"), max_length=1000, null=False, blank=True
     )
     annual_sales = models.PositiveIntegerField(
-        _("Chiffre d'affaires"), choices=AnnualSales.choices, null=True, blank=True
+        _("Chiffre d'affaires"),
+        choices=AnnualSales.choices,
+        null=True,
+        blank=True,
+        db_index=True,
     )
     n_employees = models.PositiveIntegerField(
-        _("Nombre d'employés"), choices=NEmployees.choices, null=True, blank=True
+        _("Nombre d'employés"),
+        choices=NEmployees.choices,
+        null=True,
+        blank=True,
+        db_index=True,
     )
     added = models.DateField(_("Date d'ajout"), auto_now_add=True)
     updated = models.DateField(_("Date de mise à jour"), auto_now=True)
@@ -55,14 +75,21 @@ class Address(models.Model):
     The site can be a production site, where materials are made.
     """
 
+    class Meta:
+        verbose_name = _("Adresse")
+        verbose_name_plural = _("Adresses")
+
     enterprise = models.ForeignKey(
         Enterprise,
         on_delete=models.CASCADE,
         verbose_name=_("Entreprise"),
         related_name="addresses",
+        db_index=True,
     )
     text_version = models.CharField(_("Adresse textuelle"), max_length=400, null=False)
-    geolocation = models.PointField(_("Coordonnées"), geography=True, null=False)
+    geolocation = models.PointField(
+        _("Coordonnées"), geography=True, null=False, spatial_index=True
+    )
     is_production = models.BooleanField(_("Est un lieu de production"))
 
     def __str__(self):
@@ -74,9 +101,16 @@ class MaterialTypeCategory(models.Model):
     These categories are used to regroup Material Types.
     """
 
-    name = models.CharField(_("Nom de la catégorie"), max_length=200, null=False)
+    class Meta:
+        verbose_name = _("Catégorie de typologies")
+        verbose_name_plural = _("Catégories de typologies")
+        ordering = ["order"]
+
+    name = models.CharField(
+        _("Nom de la catégorie"), max_length=200, null=False, unique=True
+    )
     order = models.PositiveSmallIntegerField(
-        _("Ordre d'affichage"), null=False, default=99
+        _("Ordre d'affichage"), null=False, default=99, db_index=True
     )
 
     def __str__(self):
@@ -88,16 +122,62 @@ class MaterialType(models.Model):
     Defines the usages of the materials (insulation, beam...).
     """
 
+    class Meta:
+        verbose_name = _("Typologie de matériaux")
+        verbose_name_plural = _("Typologies de matériaux")
+        ordering = ["category", "order"]
+
     category = models.ForeignKey(
         MaterialTypeCategory,
         on_delete=models.SET_NULL,
         null=True,
         verbose_name=_("Catégorie de typologie"),
         related_name="usages",
+        db_index=True,
     )
-    name = models.CharField(_("Typologie de matériaux"), max_length=200, null=False)
+    name = models.CharField(
+        _("Typologie de matériaux"), max_length=200, null=False, unique=True
+    )
     order = models.PositiveSmallIntegerField(
-        _("Ordre d'affichage"), null=False, default=99
+        _("Ordre d'affichage"), null=False, default=99, db_index=True
+    )
+
+    def __str__(self):
+        return self.name
+
+
+class MaterialOrigin(models.Model):
+    """
+    The different ecological origins of the materials (reuse, biobased...).
+    """
+
+    class Meta:
+        verbose_name = _("Origine écologiques")
+        verbose_name_plural = _("Origines écologiques")
+
+    name = models.CharField(
+        _("Nom de l'origine"),
+        unique=True,
+        max_length=50,
+        null=False,
+    )
+
+    def __str__(self):
+        return self.name
+
+
+class BiobasedOriginMaterial(models.Model):
+    """
+    Based materials / origins for the biobased materials (wood, straw...).
+    """
+
+    class Meta:
+        verbose_name = _("Matériau biosourcé")
+        verbose_name_plural = _("Matériaux biosourcés")
+        ordering = ["name"]
+
+    name = models.CharField(
+        _("Nom"), max_length=50, null=False, unique=True, db_index=True
     )
 
     def __str__(self):
@@ -111,28 +191,47 @@ class MaterialByEnterprise(models.Model):
     These materials have a type (for their usage), but also an origin. This last one defines why they are "ecological".
     """
 
-    class MaterialOrigins(models.IntegerChoices):
-        REUSE = 1, _("De réemploi")
-        BIOBASED = 2, _("Biosourcé")
-        RECYCLED = 3, _("Recyclé")
-        REUSABLE = 4, _("Réutilisable")
+    class Meta:
+        verbose_name = _("Matériau produit")
+        verbose_name_plural = _("Matériaux produits")
+        ordering = ["type"]
+        unique_together = [["enterprise", "type", "origin"]]
 
     enterprise = models.ForeignKey(
         Enterprise,
         on_delete=models.CASCADE,
         verbose_name=_("Entreprise"),
-        related_name=_("materials_producted"),
+        related_name=_("products"),
+        db_index=True,
     )
     type = models.ForeignKey(
         MaterialType,
         on_delete=models.CASCADE,
         verbose_name=_("Typologie"),
         related_name="products",
+        db_index=True,
     )
-    origin = models.PositiveSmallIntegerField(
-        _("Origine"),
-        choices=MaterialOrigins.choices,
+    origin = models.ForeignKey(
+        MaterialOrigin,
+        on_delete=models.CASCADE,
+        verbose_name=_("Origine"),
         null=False,
+        related_name="materials",
+        db_index=True,
+    )
+    address = models.ManyToManyField(
+        Address,
+        verbose_name=_("Adresse de production"),
+        blank=True,
+        related_name="products",
+        db_index=True,
+    )
+    biobased_material = models.ManyToManyField(
+        BiobasedOriginMaterial,
+        verbose_name=_("Matériau biosourcé"),
+        blank=True,
+        related_name="products",
+        db_index=True,
     )
 
     def __str__(self):
@@ -141,78 +240,26 @@ class MaterialByEnterprise(models.Model):
         )
 
 
-class MaterialProductionAddress(models.Model):
-    """
-    Links the materials to their production addresses.
-    """
-
-    material = models.ForeignKey(
-        MaterialByEnterprise,
-        on_delete=models.CASCADE,
-        verbose_name=_("Matériau"),
-        related_name="production_addresses",
-    )
-    address = models.ForeignKey(
-        Address,
-        on_delete=models.CASCADE,
-        verbose_name=_("Addresse de production"),
-        related_name="materials",
-    )
-
-    def __str__(self):
-        return _("{material} à {address}").format(
-            material=self.material, address=self.address
-        )
-
-
-class BiobasedOriginMaterial(models.Model):
-    """
-    Based materials / origins for the biobased materials (wood, straw...).
-    """
-
-    name = models.CharField(_("Nom"), max_length=50, null=False)
-
-    def __str__(self):
-        return self.name
-
-
-class LinkBiobasedMaterial(models.Model):
-    """
-    Links the biobased material to the based material (wood, straw...).
-    """
-
-    material = models.ForeignKey(
-        MaterialByEnterprise,
-        on_delete=models.CASCADE,
-        verbose_name=_("Matériau de l'entreprise"),
-        related_name="biobased_origins",
-    )
-    biobased_origin = models.ForeignKey(
-        BiobasedOriginMaterial,
-        on_delete=models.CASCADE,
-        verbose_name=_("Origine biosourcée"),
-        related_name="based_materials",
-    )
-
-    def __str__(self):
-        return _("{material} en {biobased_origin}").format(
-            material=self.material, biobased_origin=self.biobased_origin
-        )
-
-
 class Contact(models.Model):
+    class Meta:
+        verbose_name = _("Contact")
+        verbose_name_plural = _("Contacts")
+
     enterprise = models.ForeignKey(
         Enterprise,
         on_delete=models.CASCADE,
         verbose_name=_("Entreprise"),
         related_name="contacts",
+        db_index=True,
     )
-    firstname = models.CharField(_("Prénom"), max_length=50, null=False)
-    surname = models.CharField(_("Nom de famille"), max_length=50, null=False)
-    description = models.TextField(_("Description"), max_length=200)
-    phone1 = models.CharField(_("Téléphone 1"), max_length=25)
-    phone2 = models.CharField(_("Téléphone 2"), max_length=25)
-    mail = models.EmailField(_("Adresse mail"))
+    firstname = models.CharField(_("Prénom"), max_length=50, null=False, db_index=True)
+    surname = models.CharField(
+        _("Nom de famille"), max_length=50, null=False, db_index=True, blank=True
+    )
+    description = models.TextField(_("Description"), max_length=200, blank=True)
+    phone1 = models.CharField(_("Téléphone 1"), max_length=25, db_index=True, blank=True)
+    phone2 = models.CharField(_("Téléphone 2"), max_length=25, db_index=True, blank=True)
+    mail = models.EmailField(_("Adresse mail"), db_index=True, null=True, blank=True)
 
     def __str__(self):
         return _("{firstname} {surname}").format(

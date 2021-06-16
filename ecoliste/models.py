@@ -41,7 +41,6 @@ class Enterprise(models.Model):
         max_length=200,
         null=False,
         blank=True,
-        unique=True,
         db_index=True,
     )
     description = models.TextField(

@@ -37,39 +37,6 @@
 
     <h1>Matériaux</h1>
 
-    {% comment %}
-<ul>
-    {% for category, types in materials.items %}
-        <li>
-            {{ category.name }}
-            <ul>
-                {% for type, materials in types.items %}
-                    <li>
-                        {{ type.name }}
-                        <ul>
-                            {% for material in materials %}
-                                <li>
-                                    {{ material.origin }}
-                                    {% if material.address %}
-                                        <ul>
-                                            {% for address in material.address.all %}
-                                                <li>{{ address }}</li>
-                                            {% endfor %}
-                                        </ul>
-                                    {% endif %}
-                                </li>
-                            {% endfor %}
-                        </ul>
-                    </li>
-                {% endfor %}
-            </ul>
-        </li>
-    {% empty %}
-        <li>Aucun matériau renseigné actuellement</li>
-    {% endfor %}
-</ul>
-{% endcomment %}
-
     {% regroup materials by type.category as category_list %}
     <ul>
         {% for category in category_list %}
@@ -80,7 +47,13 @@
                         <li>{{ type.grouper }}
                             <ul>
                                 {% for material in type.list %}
-                                    <li>{{ material.origin }}</li>
+                                    <li>{{ material.origin }}
+                                        <ul>
+                                            {% for address in material.address.all %}
+                                                <li>{{ address }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    </li>
                                 {% endfor %}
                             </ul>
                         </li>

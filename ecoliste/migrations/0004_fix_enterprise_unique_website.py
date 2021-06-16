@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('ecoliste', '0003_contacts_fix_null'),
+        ("ecoliste", "0003_contacts_fix_null"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='enterprise',
-            name='website',
-            field=models.URLField(blank=True, db_index=True, verbose_name='Site web'),
+            model_name="enterprise",
+            name="website",
+            field=models.URLField(blank=True, db_index=True, verbose_name="Site web"),
         ),
     ]

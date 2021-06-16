@@ -256,8 +256,12 @@ class Contact(models.Model):
         _("Nom de famille"), max_length=50, null=False, db_index=True, blank=True
     )
     description = models.TextField(_("Description"), max_length=200, blank=True)
-    phone1 = models.CharField(_("Téléphone 1"), max_length=25, db_index=True, blank=True)
-    phone2 = models.CharField(_("Téléphone 2"), max_length=25, db_index=True, blank=True)
+    phone1 = models.CharField(
+        _("Téléphone 1"), max_length=25, db_index=True, blank=True
+    )
+    phone2 = models.CharField(
+        _("Téléphone 2"), max_length=25, db_index=True, blank=True
+    )
     mail = models.EmailField(_("Adresse mail"), db_index=True, null=True, blank=True)
 
     def __str__(self):

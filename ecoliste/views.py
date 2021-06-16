@@ -34,6 +34,6 @@ def enterprise_view(request, enterprise_id):
         "enterprise": enterprise,
         "addresses": addresses,
         "materials": materials_categorised,
-        "contacts": contacts
+        "contacts": contacts,
     }
     return render(request, "ecoliste/enterprise.html", context)

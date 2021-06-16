@@ -6,20 +6,32 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('ecoliste', '0002_contacts_fixes'),
+        ("ecoliste", "0002_contacts_fixes"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='contact',
-            name='phone1',
-            field=models.CharField(blank=True, db_index=True, default='', max_length=25, verbose_name='Téléphone 1'),
+            model_name="contact",
+            name="phone1",
+            field=models.CharField(
+                blank=True,
+                db_index=True,
+                default="",
+                max_length=25,
+                verbose_name="Téléphone 1",
+            ),
             preserve_default=False,
         ),
         migrations.AlterField(
-            model_name='contact',
-            name='phone2',
-            field=models.CharField(blank=True, db_index=True, default='', max_length=25, verbose_name='Téléphone 2'),
+            model_name="contact",
+            name="phone2",
+            field=models.CharField(
+                blank=True,
+                db_index=True,
+                default="",
+                max_length=25,
+                verbose_name="Téléphone 2",
+            ),
             preserve_default=False,
         ),
     ]

@@ -6,37 +6,59 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('ecoliste', '0001_initial'),
+        ("ecoliste", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='contact',
-            name='description',
-            field=models.TextField(blank=True, max_length=200, verbose_name='Description'),
+            model_name="contact",
+            name="description",
+            field=models.TextField(
+                blank=True, max_length=200, verbose_name="Description"
+            ),
         ),
         migrations.AlterField(
-            model_name='contact',
-            name='mail',
-            field=models.EmailField(blank=True, db_index=True, max_length=254, null=True, verbose_name='Adresse mail'),
+            model_name="contact",
+            name="mail",
+            field=models.EmailField(
+                blank=True,
+                db_index=True,
+                max_length=254,
+                null=True,
+                verbose_name="Adresse mail",
+            ),
         ),
         migrations.AlterField(
-            model_name='contact',
-            name='phone1',
-            field=models.CharField(blank=True, db_index=True, max_length=25, null=True, verbose_name='Téléphone 1'),
+            model_name="contact",
+            name="phone1",
+            field=models.CharField(
+                blank=True,
+                db_index=True,
+                max_length=25,
+                null=True,
+                verbose_name="Téléphone 1",
+            ),
         ),
         migrations.AlterField(
-            model_name='contact',
-            name='phone2',
-            field=models.CharField(blank=True, db_index=True, max_length=25, null=True, verbose_name='Téléphone 2'),
+            model_name="contact",
+            name="phone2",
+            field=models.CharField(
+                blank=True,
+                db_index=True,
+                max_length=25,
+                null=True,
+                verbose_name="Téléphone 2",
+            ),
         ),
         migrations.AlterField(
-            model_name='contact',
-            name='surname',
-            field=models.CharField(blank=True, db_index=True, max_length=50, verbose_name='Nom de famille'),
+            model_name="contact",
+            name="surname",
+            field=models.CharField(
+                blank=True, db_index=True, max_length=50, verbose_name="Nom de famille"
+            ),
         ),
         migrations.AlterUniqueTogether(
-            name='contact',
+            name="contact",
             unique_together=set(),
         ),
     ]

@@ -3,40 +3,41 @@
 {% block title %}{{ enterprise.name }} | BTP écoliste{% endblock title %}
 
 {% block content %}
-<h1>Fiche d'identité</h1>
-<ul>
-    <li>Nom : {{ enterprise.name }}</li>
-    <li>Site internet : <a href="{{ enterprise.website }}">{{ enterprise.website }}</a></li>
-    <li>Description : {{ enterprise.description }}</li>
-    <li>Chiffre d'affaires : {{ enterprise.get_annual_sales_display }}</li>
-    <li>Nombre d'employés : {{ enterprise.get_n_employees_display }}</li>
-    <li>Créée : {{ enterprise.added }}</li>
-    <li>Modifiée : {{ enterprise.updated }}</li>
-</ul>
+    <h1>Fiche d'identité</h1>
+    <ul>
+        <li>Nom : {{ enterprise.name }}</li>
+        <li>Site internet : <a href="{{ enterprise.website }}">{{ enterprise.website }}</a></li>
+        <li>Description : {{ enterprise.description }}</li>
+        <li>Chiffre d'affaires : {{ enterprise.get_annual_sales_display }}</li>
+        <li>Nombre d'employés : {{ enterprise.get_n_employees_display }}</li>
+        <li>Créée : {{ enterprise.added }}</li>
+        <li>Modifiée : {{ enterprise.updated }}</li>
+    </ul>
 
-<h1>Adresses :</h1>
+    <h1>Adresses :</h1>
 
-<ul>
-    <li>
-        <ul>
-            <li>Adresse</li>
-            <li>Production</li>
-        </ul>
-    </li>
-    {% for address in addresses %}
+    <ul>
         <li>
             <ul>
-                <li>{{ address.text_version }}</li>
-                <li>{{ address.is_production }}</li>
+                <li>Adresse</li>
+                <li>Production</li>
             </ul>
         </li>
-    {% empty %}
-        <li>Aucune adresse connue</li>
-    {% endfor %}
-</ul>
+        {% for address in addresses %}
+            <li>
+                <ul>
+                    <li>{{ address.text_version }}</li>
+                    <li>{{ address.is_production }}</li>
+                </ul>
+            </li>
+        {% empty %}
+            <li>Aucune adresse connue</li>
+        {% endfor %}
+    </ul>
 
-<h1>Matériaux</h1>
+    <h1>Matériaux</h1>
 
+    {% comment %}
 <ul>
     {% for category, types in materials.items %}
         <li>
@@ -67,34 +68,55 @@
         <li>Aucun matériau renseigné actuellement</li>
     {% endfor %}
 </ul>
+{% endcomment %}
 
-<h1>Contacts</h1>
+    {% regroup materials by type.category as category_list %}
+    <ul>
+        {% for category in category_list %}
+            <li>{{ category.grouper }}
+                <ul>
+                    {% regroup category.list by type as type_list %}
+                    {% for type in type_list %}
+                        <li>{{ type.grouper }}
+                            <ul>
+                                {% for material in type.list %}
+                                    <li>{{ material.origin }}</li>
+                                {% endfor %}
+                            </ul>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </li>
+        {% endfor %}
+    </ul>
 
-<ul>
-    <li>
-        <ul>
-            <li>Prénom</li>
-            <li>Nom</li>
-            <li>Description</li>
-            <li>Téléphone 1</li>
-            <li>Téléphone 2</li>
-            <li>Mail</li>
-        </ul>
-    </li>
-    {% for contact in contacts %}
+    <h1>Contacts</h1>
+
+    <ul>
         <li>
             <ul>
-                <li>{{ contact.firstname }}</li>
-                <li>{{ contact.surname }}</li>
-                <li>{{ contact.description }}</li>
-                <li>{{ contact.phone1 }}</li>
-                <li>{{ contact.phone2 }}</li>
-                <li>{{ contact.mail }}</li>
+                <li>Prénom</li>
+                <li>Nom</li>
+                <li>Description</li>
+                <li>Téléphone 1</li>
+                <li>Téléphone 2</li>
+                <li>Mail</li>
             </ul>
         </li>
-    {% empty %}
-        <li>Aucun contact renseigné</li>
-    {% endfor %}
-</ul>
+        {% for contact in contacts %}
+            <li>
+                <ul>
+                    <li>{{ contact.firstname }}</li>
+                    <li>{{ contact.surname }}</li>
+                    <li>{{ contact.description }}</li>
+                    <li>{{ contact.phone1 }}</li>
+                    <li>{{ contact.phone2 }}</li>
+                    <li>{{ contact.mail }}</li>
+                </ul>
+            </li>
+        {% empty %}
+            <li>Aucun contact renseigné</li>
+        {% endfor %}
+    </ul>
 
 {% endblock content %}

@@ -1,12 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "ecoliste/base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <title>{{ enterprise.name }}</title>
-</head>
+{% block title %}{{ enterprise.name }} | BTP écoliste{% endblock title %}
 
-<body>
+{% block content %}
 <h1>Fiche d'identité</h1>
 <ul>
     <li>Nom : {{ enterprise.name }}</li>
@@ -20,81 +16,85 @@
 
 <h1>Adresses :</h1>
 
-{% if addresses %}
-    <ul>
-        {% for address in addresses %}
-            <li>{{ address.text_version }}, production = {{ address.is_production }}</li>
-        {% endfor %}
-    </ul>
-{% else %}
-    <p>Pas d'adresse renseignée</p>
-{% endif %}
+<ul>
+    <li>
+        <ul>
+            <li>Adresse</li>
+            <li>Production</li>
+        </ul>
+    </li>
+    {% for address in addresses %}
+        <li>
+            <ul>
+                <li>{{ address.text_version }}</li>
+                <li>{{ address.is_production }}</li>
+            </ul>
+        </li>
+    {% empty %}
+        <li>Aucune adresse connue</li>
+    {% endfor %}
+</ul>
 
 <h1>Matériaux</h1>
 
-{% if materials %}
-    <ul>
-        {% for category, types in materials.items %}
-            <li>
-                {{ category.name }}
-                <ul>
-                    {% for type, materials in types.items %}
-                        <li>
-                            {{ type.name }}
-                            <ul>
-                                {% for material in materials %}
-                                    <li>
-                                        {{ material.origin }}
-                                        {% if material.address %}
-                                            <ul>
-                                                {% for address in material.address.all %}
-                                                    <li>{{ address }}</li>
-                                                {% endfor %}
-                                            </ul>
-                                        {% endif %}
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                        </li>
-                    {% endfor %}
-                </ul>
-            </li>
-        {% endfor %}
-    </ul>
-{% else %}
-    <p>Aucun matériau renseigné actuellement.</p>
-{% endif %}
+<ul>
+    {% for category, types in materials.items %}
+        <li>
+            {{ category.name }}
+            <ul>
+                {% for type, materials in types.items %}
+                    <li>
+                        {{ type.name }}
+                        <ul>
+                            {% for material in materials %}
+                                <li>
+                                    {{ material.origin }}
+                                    {% if material.address %}
+                                        <ul>
+                                            {% for address in material.address.all %}
+                                                <li>{{ address }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                {% endfor %}
+            </ul>
+        </li>
+    {% empty %}
+        <li>Aucun matériau renseigné actuellement</li>
+    {% endfor %}
+</ul>
 
 <h1>Contacts</h1>
 
-{% if contacts %}
-    <ul>
+<ul>
+    <li>
+        <ul>
+            <li>Prénom</li>
+            <li>Nom</li>
+            <li>Description</li>
+            <li>Téléphone 1</li>
+            <li>Téléphone 2</li>
+            <li>Mail</li>
+        </ul>
+    </li>
+    {% for contact in contacts %}
         <li>
             <ul>
-                <li>Prénom</li>
-                <li>Nom</li>
-                <li>Description</li>
-                <li>Téléphone 1</li>
-                <li>Téléphone 2</li>
-                <li>Mail</li>
+                <li>{{ contact.firstname }}</li>
+                <li>{{ contact.surname }}</li>
+                <li>{{ contact.description }}</li>
+                <li>{{ contact.phone1 }}</li>
+                <li>{{ contact.phone2 }}</li>
+                <li>{{ contact.mail }}</li>
             </ul>
         </li>
-        {% for contact in contacts %}
-            <li>
-                <ul>
-                    <li>{{ contact.firstname }}</li>
-                    <li>{{ contact.surname }}</li>
-                    <li>{{ contact.description }}</li>
-                    <li>{{ contact.phone1 }}</li>
-                    <li>{{ contact.phone2 }}</li>
-                    <li>{{ contact.mail }}</li>
-                </ul>
-            </li>
-        {% endfor %}
-    </ul>
-{% else %}
-    <p>Aucun contact connu à ce jour.</p>
-{% endif %}
+    {% empty %}
+        <li>Aucun contact renseigné</li>
+    {% endfor %}
+</ul>
 
-</body>
-</html>
+{% endblock content %}

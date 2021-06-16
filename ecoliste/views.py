@@ -37,3 +37,6 @@ def enterprise_view(request, enterprise_id):
         "contacts": contacts,
     }
     return render(request, "ecoliste/enterprise.html", context)
+
+def about_view(request):
+    return render(request,"ecoliste/about.html")

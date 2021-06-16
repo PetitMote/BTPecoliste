@@ -9,4 +9,5 @@ urlpatterns = [
     path(
         _("entreprise/<int:enterprise_id>/"), views.enterprise_view, name="enterprise"
     ),
+    path(_("about"), views.about_view, name="about")
 ]

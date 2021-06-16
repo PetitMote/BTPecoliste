@@ -47,12 +47,19 @@
                         <li>{{ type.grouper }}
                             <ul>
                                 {% for material in type.list %}
-                                    <li>{{ material.origin }}
+                                    <li>{{ material.get_origin_display }}
                                         <ul>
                                             {% for address in material.address.all %}
                                                 <li>{{ address }}</li>
                                             {% endfor %}
                                         </ul>
+                                        {% if material.origin == 2 %}
+                                        <ul>
+                                        {% for biobased in material.biobased_material.all %}
+                                            <li>{{ biobased.name }}</li>
+                                        {% endfor %}
+                                        </ul>
+                                        {% endif %}
                                     </li>
                                 {% endfor %}
                             </ul>
@@ -91,5 +98,4 @@
             <li>Aucun contact renseigné</li>
         {% endfor %}
     </ul>
-
 {% endblock content %}

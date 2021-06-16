@@ -145,26 +145,6 @@ class MaterialType(models.Model):
         return self.name
 
 
-class MaterialOrigin(models.Model):
-    """
-    The different ecological origins of the materials (reuse, biobased...).
-    """
-
-    class Meta:
-        verbose_name = _("Origine écologiques")
-        verbose_name_plural = _("Origines écologiques")
-
-    name = models.CharField(
-        _("Nom de l'origine"),
-        unique=True,
-        max_length=50,
-        null=False,
-    )
-
-    def __str__(self):
-        return self.name
-
-
 class BiobasedOriginMaterial(models.Model):
     """
     Based materials / origins for the biobased materials (wood, straw...).
@@ -196,6 +176,12 @@ class MaterialByEnterprise(models.Model):
         ordering = ["type"]
         unique_together = [["enterprise", "type", "origin"]]
 
+    class MaterialOrigins(models.IntegerChoices):
+        REUSE = 1, _("De réemploi")
+        BIOBASED = 2, _("Biosourcé")
+        RECYCLED = 3, _("Recyclé")
+        REUSABLE = 4, _("Réutilisable")
+
     enterprise = models.ForeignKey(
         Enterprise,
         on_delete=models.CASCADE,
@@ -210,13 +196,10 @@ class MaterialByEnterprise(models.Model):
         related_name="products",
         db_index=True,
     )
-    origin = models.ForeignKey(
-        MaterialOrigin,
-        on_delete=models.CASCADE,
-        verbose_name=_("Origine"),
+    origin = models.PositiveSmallIntegerField(
+        _("Origine"),
+        choices=MaterialOrigins.choices,
         null=False,
-        related_name="materials",
-        db_index=True,
     )
     address = models.ManyToManyField(
         Address,
@@ -235,7 +218,7 @@ class MaterialByEnterprise(models.Model):
 
     def __str__(self):
         return _("{type} {origin} produit par {enterprise}").format(
-            type=self.type, origin=self.origin, enterprise=self.enterprise
+            type=self.type, origin=self.get_origin_display(), enterprise=self.enterprise
         )
 
 

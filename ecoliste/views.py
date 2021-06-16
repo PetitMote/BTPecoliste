@@ -14,8 +14,8 @@ def enterprise_view(request, enterprise_id):
 
     materials = (
         enterprise.products.all()
-        .select_related("type", "type__category", "origin")
-        .prefetch_related("address")
+        .select_related("type", "type__category")
+        .prefetch_related("address", "biobased_material")
     )
 
     context = {

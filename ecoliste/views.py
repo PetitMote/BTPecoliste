@@ -4,7 +4,7 @@ from .models import Enterprise, MaterialTypeCategory, MaterialType
 
 
 def search_view(request):
-    return HttpResponse("Page de recherche de matériaux")
+    return render(request, "ecoliste/search.html")
 
 
 def enterprise_view(request, enterprise_id):

@@ -1,9 +1,9 @@
 <header>
-    <h1><a href="{% url "ecoliste:search" %}">BTP écoliste</a> </h1>
     <nav>
-        <ul>
-            <li><a href="{% url "ecoliste:search" %}">Chercher des matériaux</a></li>
-            <li><a href="{% url "ecoliste:about" %}">À propos</a></li>
+        <ul class="site-menu">
+            <a href="{% url 'ecoliste:search' %}" class="site-title"><li>BTP écoliste</li></a>
+            <a href="{% url 'ecoliste:search' %}"><li>Chercher des matériaux</li></a>
+            <a href="{% url 'ecoliste:about' %}"><li>À propos</li></a>
         </ul>
     </nav>
 </header>

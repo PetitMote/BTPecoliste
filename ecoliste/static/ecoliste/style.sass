@@ -1,0 +1,157 @@
+@use "sass:color"
+
+$font-stack: "Fira Sans", "Source Sans", sans-serif
+
+$color-primary: #13660c
+$color-grey: #777777
+$color-blue: #21A1ED
+$color-link: $color-blue
+$color-secondary: #580E5F
+$color-black: #000000
+$color-white: #FFFFFF
+$color-background: $color-white
+$color-text: #282525
+
+$width-content: 1620px
+$width-header: $width-content - 200
+
+$border-color: color.adjust($color-grey, $alpha: -0.3%)
+$border-style: 1px solid $border-color
+$box-shadow-style: 0 0.5rem 1rem -0.2rem $border-color
+
+@mixin fullhd
+  @media (min-width: 1620px)
+    @content
+
+// Base
+html
+  font-size: 10px
+  font-family: $font-stack
+  background-color: $color-background
+  color: $color-text
+  line-height: 1.4
+
+body
+  margin: 0
+  font-size: 1.6rem
+
+
+// Header style
+header
+  background-color: $color-primary
+  color: $color-white
+  margin: 0
+
+
+.site-menu
+  display: flex
+  list-style: none
+  flex-flow: row wrap
+  font-weight: bold
+  margin: 0 auto
+  align-items: flex-end
+  font-size: 1.9rem
+  @include fullhd
+    width: $width-header
+
+  li
+    padding: 15px 25px
+
+  li:hover
+    background-color: color.adjust($color-primary, $lightness: +5%)
+
+  a
+    color: inherit
+
+.site-title
+  color: inherit
+  margin-right: auto
+  font-size: 3rem
+
+h1
+  text-align: center
+
+a
+  text-decoration: none
+  color: $color-link
+
+// Footer styles
+footer
+  background-color: $color-primary
+  color: $color-white
+  display: flex
+  flex-flow: column
+  font-size: 1.4rem
+  padding: 5px
+  text-align: center
+
+
+  nav
+    @media (min-width: 1620px)
+      width: $width-header
+    margin: 0 auto
+    padding: 0
+
+    ul
+      display: flex
+      flex-flow: row wrap
+      list-style: none
+      justify-content: space-around
+      padding: 0
+      margin: 0
+
+      a
+        flex: 1
+        color: inherit
+      a:hover
+        background-color: color.adjust($color-primary, $lightness: +5%)
+
+
+  p
+    margin: 0 auto
+
+// Content styles
+.content
+  @include fullhd
+    width: $width-content
+    margin: 0 auto
+
+.rows
+  display: flex
+  flex-flow: column
+
+.row-half
+  flex: 1
+
+.columns
+  display: flex
+  flex-flow: row wrap
+  justify-content: space-between
+
+.column-half
+  flex: 1 400px
+  padding: 5px
+
+// Addresses style
+.addresses-list
+  list-style: none
+  padding: 0
+  border: $border-style
+  border-radius: 5px
+  box-shadow: $box-shadow-style
+
+  li
+    padding: 5px
+    border-bottom: $border-style
+
+    span
+      margin-right: 5px
+
+  li:last-of-type
+     border-bottom: none
+
+// Materials style
+.materials-list
+  list-style: none
+  ul
+    list-style: none

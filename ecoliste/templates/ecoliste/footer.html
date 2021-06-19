@@ -1,9 +1,16 @@
 <footer>
     <nav>
         <ul>
-            <li>Mentions légales</li>
-            <li>Nous contacter</li>
-            <li>Github</li>
+            <a href="{% url 'ecoliste:legal' %}">
+                <li>Mentions légales</li>
+            </a>
+            <a href="{% url 'ecoliste:contact' %}">
+                <li>Nous contacter</li>
+            </a>
+            <a href="https://github.com/PetitMote/BTPecoliste">
+                <li>Github</li>
+            </a>
         </ul>
     </nav>
+    <p>v0.0.0</p>
 </footer>

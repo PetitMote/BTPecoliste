@@ -9,5 +9,7 @@ urlpatterns = [
     path(
         _("entreprise/<int:enterprise_id>/"), views.enterprise_view, name="enterprise"
     ),
-    path(_("about"), views.about_view, name="about")
+    path(_("about"), views.about_view, name="about"),
+    path(_("legal"), views.about_view, name="legal"),
+    path(_("contact"), views.about_view, name="contact")
 ]

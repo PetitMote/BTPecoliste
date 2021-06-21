@@ -11,5 +11,5 @@ urlpatterns = [
     ),
     path(_("about"), views.about_view, name="about"),
     path(_("legal"), views.about_view, name="legal"),
-    path(_("contact"), views.about_view, name="contact")
+    path(_("contact"), views.about_view, name="contact"),
 ]

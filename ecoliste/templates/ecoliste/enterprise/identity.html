@@ -1,0 +1,12 @@
+<section id="identity" class="column-half">
+    <h1>Fiche d'identité</h1>
+    <ul>
+        <li>Nom : {{ enterprise.name }}</li>
+        <li>Site internet : <a href="{{ enterprise.website }}">{{ enterprise.website }}</a></li>
+        <li>Description : {{ enterprise.description }}</li>
+        <li>Chiffre d'affaires : {{ enterprise.get_annual_sales_display }}</li>
+        <li>Nombre d'employés : {{ enterprise.get_n_employees_display }}</li>
+        <li>Créée : {{ enterprise.added }}</li>
+        <li>Modifiée : {{ enterprise.updated }}</li>
+    </ul>
+</section>

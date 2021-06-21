@@ -1,0 +1,21 @@
+<section id="contacts" class="column-half">
+    <h1>Contacts</h1>
+    <ul class="contacts-list">
+        {% for contact in contacts %}
+            <li>
+                <ul class="contacts-list">
+                    <li class="names"><span>👤</span>{{ contact.firstname }} {{ contact.surname }}</li>
+                    <li class="mail"><span>📧</span><a href="mailto:{{ contact.mail }}">{{ contact.mail }}</a></li>
+                    {% if contact.phone1 or contact.phone1 %}
+                        <li class="phone">
+                            <span><span>📞</span>{{ contact.phone1 }}</span><span><span>📱</span>{{ contact.phone2 }}</span>
+                        </li>
+                    {% endif %}
+                    <li class="description"><span>💬</span>{{ contact.description }}</li>
+                </ul>
+            </li>
+        {% empty %}
+            <li>Aucun contact renseigné</li>
+        {% endfor %}
+    </ul>
+</section>

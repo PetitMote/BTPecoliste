@@ -1,0 +1,44 @@
+<section id="materials" class="column-half">
+    <h1>Matériaux</h1>
+
+    {% regroup materials by type.category as category_list %}
+    <ul class="materials-list">
+        {% for category in category_list %}
+            <li>
+                <details>
+                    <summary>{{ category.grouper }}</summary>
+                    <ul class="materials-types">
+                        {% regroup category.list by type as type_list %}
+                        {% for type in type_list %}
+                            <li>
+                                <details>
+                                    <summary>{{ type.grouper }}</summary>
+                                    <ul class="materials-orgins">
+                                        {% for material in type.list %}
+                                            <li>{{ material.get_origin_display }}<span
+                                                    class="is-production">🏭</span>
+                                                <ul class="materials-addresses">
+                                                    {% for address in material.address.all %}
+                                                        <li>{{ address }}</li>
+                                                    {% endfor %}
+                                                </ul>
+                                                {% if material.origin == 2 %}
+                                                    <ul class="materials-biobased">
+                                                        {% for biobased in material.biobased_material.all %}
+                                                            <li>{{ biobased.name }}</li>
+                                                        {% endfor %}
+                                                    </ul>
+                                                {% endif %}
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                </details>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </details>
+            </li>
+        {% endfor %}
+    </ul>
+
+</section>

@@ -1,0 +1,11 @@
+<section id="addresses" class="column-half">
+    <h1>Adresses</h1>
+    <ul class="addresses-list">
+        {% for address in addresses %}
+            <li>{% if address.is_production %}
+                <span class="is-production">🏭</span>{% endif %}{{ address.text_version }}</li>
+        {% empty %}
+            <li>Aucune adresse connue</li>
+        {% endfor %}
+    </ul>
+</section>

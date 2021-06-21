@@ -5,98 +5,12 @@
 {% block content %}
     <div class="rows content">
         <div class="row-half columns">
-            <section id="identity" class="column-half">
-                <h1>Fiche d'identité</h1>
-                <ul>
-                    <li>Nom : {{ enterprise.name }}</li>
-                    <li>Site internet : <a href="{{ enterprise.website }}">{{ enterprise.website }}</a></li>
-                    <li>Description : {{ enterprise.description }}</li>
-                    <li>Chiffre d'affaires : {{ enterprise.get_annual_sales_display }}</li>
-                    <li>Nombre d'employés : {{ enterprise.get_n_employees_display }}</li>
-                    <li>Créée : {{ enterprise.added }}</li>
-                    <li>Modifiée : {{ enterprise.updated }}</li>
-                </ul>
-            </section>
-
-            <section id="materials" class="column-half">
-                <h1>Matériaux</h1>
-
-                {% regroup materials by type.category as category_list %}
-                <ul class="materials-list">
-                    {% for category in category_list %}
-                        <li>
-                            <details>
-                                <summary>{{ category.grouper }}</summary>
-                                <ul class="materials-types">
-                                    {% regroup category.list by type as type_list %}
-                                    {% for type in type_list %}
-                                        <li>
-                                            <details>
-                                                <summary>{{ type.grouper }}</summary>
-                                                <ul class="materials-orgins">
-                                                    {% for material in type.list %}
-                                                        <li>{{ material.get_origin_display }}<span
-                                                                class="is-production">🏭</span>
-                                                            <ul class="materials-addresses">
-                                                                {% for address in material.address.all %}
-                                                                    <li>{{ address }}</li>
-                                                                {% endfor %}
-                                                            </ul>
-                                                            {% if material.origin == 2 %}
-                                                                <ul class="materials-biobased">
-                                                                    {% for biobased in material.biobased_material.all %}
-                                                                        <li>{{ biobased.name }}</li>
-                                                                    {% endfor %}
-                                                                </ul>
-                                                            {% endif %}
-                                                        </li>
-                                                    {% endfor %}
-                                                </ul>
-                                            </details>
-                                        </li>
-                                    {% endfor %}
-                                </ul>
-                            </details>
-                        </li>
-                    {% endfor %}
-                </ul>
-
-            </section>
+            {% include "ecoliste/enterprise/identity.html" %}
+            {% include "ecoliste/enterprise/materials.html" %}
         </div>
         <div class="row-half columns">
-            <section id="addresses" class="column-half">
-                <h1>Adresses</h1>
-                <ul class="addresses-list">
-                    {% for address in addresses %}
-                        <li>{% if address.is_production %}
-                            <span class="is-production">🏭</span>{% endif %}{{ address.text_version }}</li>
-                    {% empty %}
-                        <li>Aucune adresse connue</li>
-                    {% endfor %}
-                </ul>
-            </section>
-
-            <section id="contacts" class="column-half">
-                <h1>Contacts</h1>
-                <ul class="contacts-list">
-                    {% for contact in contacts %}
-                        <li>
-                            <ul class="contacts-list">
-                                <li class="names"><span>👤</span>{{ contact.firstname }} {{ contact.surname }}</li>
-                                <li class="mail"><span>📧</span><a href="mailto:{{ contact.mail }}">{{ contact.mail }}</a></li>
-                                {% if contact.phone1 or contact.phone1 %}
-                                    <li class="phone">
-                                        <span><span>📞</span>{{ contact.phone1 }}</span><span><span>📱</span>{{ contact.phone2 }}</span>
-                                    </li>
-                                {% endif %}
-                                <li class="description"><span>💬</span>{{ contact.description }}</li>
-                            </ul>
-                        </li>
-                    {% empty %}
-                        <li>Aucun contact renseigné</li>
-                    {% endfor %}
-                </ul>
-            </section>
+            {% include "ecoliste/enterprise/addresses.html" %}
+            {% include "ecoliste/enterprise/contacts.html" %}
         </div>
     </div>
 {% endblock content %}

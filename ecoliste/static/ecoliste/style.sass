@@ -32,6 +32,9 @@ html
   line-height: 1.4
 
 body
+  display: flex
+  flex-flow: column
+  min-height: 100vh
   margin: 0
   font-size: 1.6rem
 
@@ -41,7 +44,6 @@ header
   background-color: $color-primary
   color: $color-white
   margin: 0
-
 
 .site-menu
   display: flex
@@ -82,14 +84,13 @@ footer
   display: flex
   flex-flow: column
   font-size: 1.4rem
-  padding: 5px
   text-align: center
-
+  padding: 0
 
   nav
     @media (min-width: 1620px)
       width: $width-header
-    margin: 0 auto
+      margin: 0 auto
     padding: 0
 
     ul
@@ -103,6 +104,7 @@ footer
       a
         flex: 1
         color: inherit
+        padding: 5px
       a:hover
         background-color: color.adjust($color-primary, $lightness: +5%)
 
@@ -112,6 +114,7 @@ footer
 
 // Content styles
 .content
+  flex: max-content
   @include fullhd
     width: $width-content
     margin: 0 auto
@@ -132,6 +135,12 @@ footer
   flex: 1 400px
   padding: 5px
 
+// Identity styles
+#identity
+  ul
+    line-height: 1.8
+    list-style: none
+
 // Addresses style
 .addresses-list
   list-style: none
@@ -144,14 +153,66 @@ footer
     padding: 5px
     border-bottom: $border-style
 
-    span
-      margin-right: 5px
-
   li:last-of-type
      border-bottom: none
+
+  .is-production
+    margin-right: 5px
 
 // Materials style
 .materials-list
   list-style: none
-  ul
-    list-style: none
+  padding: 0
+  li
+    border-bottom: $border-style
+    font-size: 1.8rem
+    span
+      margin-right: 5px
+    ul
+      list-style: none
+      li:last-of-type
+        border-bottom: none
+  li:first-of-type
+    border-top: $border-style
+
+  .materials-addresses
+    display: none
+
+  .materials-biobased
+    display: none
+
+  .is-production
+    margin-left: 5px
+
+// Contacts style
+.contacts-list
+  list-style: none
+  display: flex
+  flex-flow: wrap
+  text-align: justify
+  padding: 8px
+
+  li
+    flex: 1 300px
+    border: $border-style
+    box-shadow: $box-shadow-style
+    border-radius: 15px
+    margin: 10px
+
+    ul
+      flex-flow: column
+      border: none
+      li
+        flex: initial
+        border: none
+        box-shadow: none
+        margin: 2px 0
+        span
+          margin-right: 5px
+  .phone
+    display: flex
+    justify-content: space-between
+    padding-right: 15px
+
+  .names
+    font-weight: bold

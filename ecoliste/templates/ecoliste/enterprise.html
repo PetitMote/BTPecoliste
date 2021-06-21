@@ -20,38 +20,47 @@
 
             <section id="materials" class="column-half">
                 <h1>Matériaux</h1>
+
                 {% regroup materials by type.category as category_list %}
                 <ul class="materials-list">
                     {% for category in category_list %}
-                        <li>{{ category.grouper }}
-                            <ul>
-                                {% regroup category.list by type as type_list %}
-                                {% for type in type_list %}
-                                    <li>{{ type.grouper }}
-                                        <ul>
-                                            {% for material in type.list %}
-                                                <li>{{ material.get_origin_display }}
-                                                    <ul>
-                                                        {% for address in material.address.all %}
-                                                            <li>{{ address }}</li>
-                                                        {% endfor %}
-                                                    </ul>
-                                                    {% if material.origin == 2 %}
-                                                        <ul>
-                                                            {% for biobased in material.biobased_material.all %}
-                                                                <li>{{ biobased.name }}</li>
-                                                            {% endfor %}
-                                                        </ul>
-                                                    {% endif %}
-                                                </li>
-                                            {% endfor %}
-                                        </ul>
-                                    </li>
-                                {% endfor %}
-                            </ul>
+                        <li>
+                            <details>
+                                <summary>{{ category.grouper }}</summary>
+                                <ul class="materials-types">
+                                    {% regroup category.list by type as type_list %}
+                                    {% for type in type_list %}
+                                        <li>
+                                            <details>
+                                                <summary>{{ type.grouper }}</summary>
+                                                <ul class="materials-orgins">
+                                                    {% for material in type.list %}
+                                                        <li>{{ material.get_origin_display }}<span
+                                                                class="is-production">🏭</span>
+                                                            <ul class="materials-addresses">
+                                                                {% for address in material.address.all %}
+                                                                    <li>{{ address }}</li>
+                                                                {% endfor %}
+                                                            </ul>
+                                                            {% if material.origin == 2 %}
+                                                                <ul class="materials-biobased">
+                                                                    {% for biobased in material.biobased_material.all %}
+                                                                        <li>{{ biobased.name }}</li>
+                                                                    {% endfor %}
+                                                                </ul>
+                                                            {% endif %}
+                                                        </li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </details>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </details>
                         </li>
                     {% endfor %}
                 </ul>
+
             </section>
         </div>
         <div class="row-half columns">
@@ -59,7 +68,8 @@
                 <h1>Adresses</h1>
                 <ul class="addresses-list">
                     {% for address in addresses %}
-                        <li>{% if address.is_production %}<span class="is_production">🏭</span>{% endif %}{{ address.text_version }}</li>
+                        <li>{% if address.is_production %}
+                            <span class="is-production">🏭</span>{% endif %}{{ address.text_version }}</li>
                     {% empty %}
                         <li>Aucune adresse connue</li>
                     {% endfor %}
@@ -68,30 +78,18 @@
 
             <section id="contacts" class="column-half">
                 <h1>Contacts</h1>
-                <ul class="list-table">
-                    <li>
-                        <ul class="contacts-list">
-                            <li>Prénom</li>
-                            <li>Nom</li>
-                            {% comment %}
-                            <li>Description</li>
-                            {% endcomment %}
-                            <li>Téléphone 1</li>
-                            <li>Téléphone 2</li>
-                            <li>Mail</li>
-                        </ul>
-                    </li>
+                <ul class="contacts-list">
                     {% for contact in contacts %}
                         <li>
                             <ul class="contacts-list">
-                                <li>{{ contact.firstname }}</li>
-                                <li>{{ contact.surname }}</li>
-                                {% comment %}
-                                <li>{{ contact.description }}</li>
-                                {% endcomment %}
-                                <li>{{ contact.phone1 }}</li>
-                                <li>{{ contact.phone2 }}</li>
-                                <li>{{ contact.mail }}</li>
+                                <li class="names"><span>👤</span>{{ contact.firstname }} {{ contact.surname }}</li>
+                                <li class="mail"><span>📧</span><a href="mailto:{{ contact.mail }}">{{ contact.mail }}</a></li>
+                                {% if contact.phone1 or contact.phone1 %}
+                                    <li class="phone">
+                                        <span><span>📞</span>{{ contact.phone1 }}</span><span><span>📱</span>{{ contact.phone2 }}</span>
+                                    </li>
+                                {% endif %}
+                                <li class="description"><span>💬</span>{{ contact.description }}</li>
                             </ul>
                         </li>
                     {% empty %}

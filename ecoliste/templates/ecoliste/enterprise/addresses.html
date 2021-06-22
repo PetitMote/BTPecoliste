@@ -8,4 +8,10 @@
             <li>Aucune adresse connue</li>
         {% endfor %}
     </ul>
+    <script type="application/json" id="addresses-points">
+        {% autoescape off %}{{ addresses_points }}{% endautoescape %}</script>
+    {% load static %}
+    <script type="text/plain" id="industry-icon-address">
+        {% autoescape off %}{% static "ecoliste/images/map-icon-industry.png" %}{% endautoescape %}</script>
+    <div id="addresses-map"></div>
 </section>

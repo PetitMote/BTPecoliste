@@ -128,4 +128,10 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+# PyCharm folder
 /.idea/
+
+# JS environment
+/node_modules/
+/package-lock.json
+/package.json

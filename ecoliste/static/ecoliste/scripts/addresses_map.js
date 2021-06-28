@@ -1,11 +1,9 @@
-var map = new L.Map("addresses-map", {center: new L.LatLng(47.628, 2.703), zoom: 5});
+var map = L.map("addresses-map").setView([47.628, 2.703], 5);
 var addresses_points = JSON.parse(document.getElementById("addresses-points").textContent);
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     maxZoom: 18,
-    tileSize: 512,
-    zoomOffset: -1,
 }).addTo(map);
 
 var iconProduction = L.icon({
@@ -28,4 +26,4 @@ function addressToLayer(geoJsonPoint, latlng) {
         return L.marker(latlng);
 }
 
-var jsonlayer = L.geoJSON(addresses_points, {pointToLayer: addressToLayer, onEachFeature: onEachAddress}).addTo(map);
+L.geoJSON(addresses_points, {pointToLayer: addressToLayer, onEachFeature: onEachAddress}).addTo(map);

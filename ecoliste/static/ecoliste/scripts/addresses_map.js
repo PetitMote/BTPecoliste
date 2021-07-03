@@ -10,7 +10,7 @@ var iconProduction = L.icon({
     iconUrl: document.getElementById("industry-icon-address").textContent,
     iconSize: [40, 40],
     iconAnchor: [20, 20],
-    popupAnchor: [20, 0],
+    popupAnchor: [0,-20],
 });
 
 function onEachAddress(feature, layer) {

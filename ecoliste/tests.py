@@ -1,3 +1,4 @@
+from django.contrib.gis.geos import Point
 from django.test import TestCase
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
@@ -6,10 +7,11 @@ from . import models
 
 ENTERPRISE_VIEW = "ecoliste:enterprise"
 
+
 def add_materials_types():
     structure = models.MaterialTypeCategory(name="Structure", order=1)
     structure.save()
-    isolation = models.MaterialTypeCategory(name="Isolation", order=1)
+    isolation = models.MaterialTypeCategory(name="Isolation", order=2)
     isolation.save()
     slabs = models.MaterialType(name="Slabs", order=1, category=structure)
     slabs.save()
@@ -42,12 +44,8 @@ class EnterpriseViewIdentityTestCase(TestCase):
         self.empty_enterprise = models.Enterprise(name="Empty Enterprise")
         self.empty_enterprise.save()
 
-        self.url_enterprise1 = reverse(
-            ENTERPRISE_VIEW, args=[self.enterprise1.pk]
-        )
-        self.url_enterprise2 = reverse(
-            ENTERPRISE_VIEW, args=[self.enterprise2.pk]
-        )
+        self.url_enterprise1 = reverse(ENTERPRISE_VIEW, args=[self.enterprise1.pk])
+        self.url_enterprise2 = reverse(ENTERPRISE_VIEW, args=[self.enterprise2.pk])
         self.url_empty_enterprise = reverse(
             ENTERPRISE_VIEW, args=[self.empty_enterprise.pk]
         )
@@ -114,23 +112,76 @@ class EnterpriseViewIdentityTestCase(TestCase):
         response = self.client.get(self.url_empty_enterprise)
         self.assertContains(response, _("Nombre d'employés inconnu"))
 
-    class EnterpriseViewAdressesTestCas(TestCase):
-        def setUp(self) -> None:
-            self.enterprise1 = models.Enterprise(name="Enterprise 1")
-            self.enterprise1.save()
-            self.enterprise2 = models.Enterprise(name="Enterprise 2")
-            self.enterprise2.save()
-            self.empty_enterprise = models.Enterprise(name="Empty Enterprise")
-            self.empty_enterprise.save()
 
-            self.url_enterprise1 = reverse(
-                ENTERPRISE_VIEW, args=[self.enterprise1.pk]
-            )
-            self.url_enterprise2 = reverse(
-                ENTERPRISE_VIEW, args=[self.enterprise2.pk]
-            )
-            self.url_empty_enterprise = reverse(
-                ENTERPRISE_VIEW, args=[self.empty_enterprise.pk]
-            )
+class EnterpriseViewAdressesTestCase(TestCase):
+    def setUp(self) -> None:
+        self.one_address = models.Enterprise(name="Enterprise 1")
+        self.one_address.save()
+        self.multi_addresses = models.Enterprise(name="Enterprise 2")
+        self.multi_addresses.save()
+        self.empty_enterprise = models.Enterprise(name="Empty Enterprise")
+        self.empty_enterprise.save()
 
-            self.enterprise1_address1 = models.Address()
+        self.url_one_address = reverse(ENTERPRISE_VIEW, args=[self.one_address.pk])
+        self.url_multi_addresses = reverse(
+            ENTERPRISE_VIEW, args=[self.multi_addresses.pk]
+        )
+        self.url_empty_enterprise = reverse(
+            ENTERPRISE_VIEW, args=[self.empty_enterprise.pk]
+        )
+
+        self.one_address_address = models.Address(
+            enterprise=self.one_address,
+            text_version="address 1 of one_address",
+            geolocation=Point([10, 10]),
+            is_production=False,
+        )
+        self.one_address_address.save()
+        self.multi_addresses_1 = models.Address(
+            enterprise=self.multi_addresses,
+            text_version="address 1 of multi_addresses",
+            geolocation=Point([20, 20]),
+            is_production=False,
+        )
+        self.multi_addresses_1.save()
+        self.multi_addresses_2 = models.Address(
+            enterprise=self.multi_addresses,
+            text_version="address 1 of multi_addresses",
+            geolocation=Point([30, 30]),
+            is_production=False,
+        )
+        self.multi_addresses_2.save()
+
+    def test_right_template_used(self):
+        response = self.client.get(self.url_one_address)
+        self.assertTemplateUsed(response, "ecoliste/enterprise/addresses.html")
+
+    def test_returns_one_address_text_version(self):
+        response = self.client.get(self.url_one_address)
+        self.assertContains(response, self.one_address_address.text_version)
+
+    def test_returns_one_address_geolocation(self):
+        response = self.client.get(self.url_one_address)
+        self.assertContains(response, "[10.0, 10.0]")
+
+    def test_returns_multi_addresses_text_versions(self):
+        response = self.client.get(self.url_multi_addresses)
+        self.assertContains(response, self.multi_addresses_1.text_version)
+        self.assertContains(response, self.multi_addresses_2.text_version)
+
+    def test_returns_multi_addresses_geolocations(self):
+        response = self.client.get(self.url_multi_addresses)
+        self.assertContains(response, "[20.0, 20.0]")
+        self.assertContains(response, "[30.0, 30.0]")
+
+    def test_returns_not_other_address_text_version(self):
+        response = self.client.get(self.url_multi_addresses)
+        self.assertNotContains(response, self.one_address_address.text_version)
+
+    def test_returns_not_other_address_geolocation(self):
+        response = self.client.get(self.url_multi_addresses)
+        self.assertNotContains(response, "[10.0, 10.0]")
+
+    def test_empty_address(self):
+        response = self.client.get(self.url_empty_enterprise)
+        self.assertContains(response, _("Aucune adresse connue"))

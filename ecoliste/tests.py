@@ -8,11 +8,13 @@ from . import models
 ENTERPRISE_VIEW = "ecoliste:enterprise"
 
 
-def add_materials_types() -> None:
+def add_materials_types() -> list[models.MaterialType]:
     structure = models.MaterialTypeCategory(name="Structure", order=1)
     structure.save()
     isolation = models.MaterialTypeCategory(name="Isolation", order=2)
     isolation.save()
+
+    # Some tests depend on the number of material types here. If you remove some of them, check they still work.
     slabs = models.MaterialType(name="Slabs", order=1, category=structure)
     slabs.save()
     beams = models.MaterialType(name="Beams", order=2, category=structure)
@@ -21,6 +23,8 @@ def add_materials_types() -> None:
     panels.save()
     bulk = models.MaterialType(name="Bulk", order=2, category=isolation)
     bulk.save()
+
+    return [slabs, beams, panels, bulk]
 
 
 class EnterpriseViewIdentityTestCase(TestCase):
@@ -185,3 +189,93 @@ class EnterpriseViewAdressesTestCase(TestCase):
     def test_empty_address(self) -> None:
         response = self.client.get(self.url_empty_enterprise)
         self.assertContains(response, _("Aucune adresse connue"))
+
+
+class EnterpriseViewMaterialsTestCase(TestCase):
+    def setUp(self) -> None:
+        self.one_material = models.Enterprise(
+            name="Enterprise 1",
+            website="https://enterprise1.com",
+            description="Fake enterprise 1 with some data",
+            annual_sales=4,
+            n_employees=5000,
+        )
+        self.one_material.save()
+        self.multi_materials = models.Enterprise(
+            name="Enterprise 2",
+            website="https://enterprise2.com",
+            description="Fake enterprise 2 with some data",
+            annual_sales=3,
+            n_employees=1000,
+        )
+        self.multi_materials.save()
+        self.empty_enterprise = models.Enterprise(name="Empty Enterprise")
+        self.empty_enterprise.save()
+
+        self.url_one_material = reverse(ENTERPRISE_VIEW, args=[self.one_material.pk])
+        self.url_multi_materials = reverse(
+            ENTERPRISE_VIEW, args=[self.multi_materials.pk]
+        )
+        self.url_empty_enterprise = reverse(
+            ENTERPRISE_VIEW, args=[self.empty_enterprise.pk]
+        )
+
+        self.mat_types = add_materials_types()
+        self.material_one_material = models.MaterialByEnterprise(
+            enterprise=self.one_material, type=self.mat_types[0], origin=1
+        )
+        self.material_one_material.save()
+
+        self.material_multi_1 = models.MaterialByEnterprise(
+            enterprise=self.multi_materials, type=self.mat_types[0], origin=1
+        )
+        self.material_multi_1.save()
+        self.material_multi_2 = models.MaterialByEnterprise(
+            enterprise=self.multi_materials, type=self.mat_types[1], origin=2
+        )
+        self.material_multi_2.save()
+        self.material_multi_3 = models.MaterialByEnterprise(
+            enterprise=self.multi_materials, type=self.mat_types[2], origin=1
+        )
+        self.material_multi_3.save()
+        self.material_multi_4 = models.MaterialByEnterprise(
+            enterprise=self.multi_materials, type=self.mat_types[3], origin=2
+        )
+        self.material_multi_4.save()
+
+    def test_right_template_used(self) -> None:
+        response = self.client.get(self.url_one_material)
+        self.assertTemplateUsed(response, "ecoliste/enterprise/materials.html")
+
+    def test_returns_one_material(self) -> None:
+        response = self.client.get(self.url_one_material)
+        self.assertContains(response, self.material_one_material.type.name)
+
+    def test_returns_one_material_category(self) -> None:
+        response = self.client.get(self.url_one_material)
+        self.assertContains(response, self.material_one_material.type.category.name)
+
+    def test_returns_multi_materials(self) -> None:
+        response = self.client.get(self.url_multi_materials)
+        self.assertContains(response, self.material_multi_1.type.name)
+        self.assertContains(response, self.material_multi_2.type.name)
+        self.assertContains(response, self.material_multi_3.type.name)
+        self.assertContains(response, self.material_multi_4.type.name)
+
+    def test_returns_multi_material_categories(self):
+        response = self.client.get(self.url_multi_materials)
+        self.assertContains(response, self.material_multi_1.type.category.name)
+        self.assertContains(response, self.material_multi_4.type.category.name)
+
+    def test_returns_not_other_material(self) -> None:
+        response = self.client.get(self.url_one_material)
+        self.assertNotContains(response, self.material_multi_4.type.name)
+
+    def test_returns_not_other_material_category(self) -> None:
+        response = self.client.get(self.url_one_material)
+        self.assertNotContains(response, self.material_multi_4.type.category.name)
+
+    def test_empty_materials(self) -> None:
+        response = self.client.get(self.url_empty_enterprise)
+        for material in self.mat_types:
+            self.assertNotContains(response, material.name)

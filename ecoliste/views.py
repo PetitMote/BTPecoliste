@@ -17,7 +17,8 @@ def ecoliste_research(
     :param filters: A dictionary containing all available parameters from the models: material types, origin, enterprise
     size… Some parameters (materials, origin, biobased), who can have multiple values at once, need to be organized
     through the form filters[key] = [list of values] even if there is only one value. There should not be empty values
-    or [""] values coming from a QueryDict.
+    or [""] values coming from a QueryDict. Other parameters (nemployees, sales) are ranges, therefore they need their
+    2 values to be passed as a tuple.
     :return: A list of Address objects.
     """
     addresses = Address.objects.filter(
@@ -39,25 +40,15 @@ def ecoliste_research(
             addresses = addresses.filter(
                 enterprise__products__biobased_material__id__in=filters["biobased"]
             )
-        if "sup_nemployees" in filters.keys():
-            # This parameter needs to be passed as a direct value (not a list)
+        if "nemployees" in filters.keys():
+            # This parameter needs to be passed as a tuple
             addresses = addresses.filter(
-                enterprise__n_employees__gte=filters["sup_nemployees"]
+                enterprise__n_employees__range=filters["nemployees"]
             )
-        if "inf_nemployees" in filters.keys():
-            # This parameter needs to be passed as a direct value (not a list)
+        if "sales" in filters.keys():
+            # This parameter needs to be passed as a tuple
             addresses = addresses.filter(
-                enterprise__n_employees__lte=filters["inf_nemployees"]
-            )
-        if "sup_sales" in filters.keys():
-            # This parameter needs to be passed as a direct value (not a list)
-            addresses = addresses.filter(
-                enterprise__annual_sales__gte=filters["sup_sales"]
-            )
-        if "inf_sales" in filters.keys():
-            # This parameter needs to be passed as a direct value (not a list)
-            addresses = addresses.filter(
-                enterprise__annual_sales__lte=filters["inf_sales"]
+                enterprise__annual_sales__range=filters["sales"]
             )
     return addresses
 

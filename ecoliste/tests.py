@@ -439,30 +439,26 @@ class SearchFunctionTestCase(TestCase):
         self.assertNotIn(self.ent2_address1, addresses)
         self.assertNotIn(self.ent2_address2, addresses)
 
-    def test_search_sup_nemployees(self):
-        filters = {"sup_nemployees": models.Enterprise.NEmployees.MEDIUM.value}
+    def test_search_nemployees(self):
+        filters = {
+            "nemployees": (
+                models.Enterprise.NEmployees.MEDIUM.value,
+                models.Enterprise.NEmployees.BIG,
+            )
+        }
         addresses = ecoliste_research(self.search_location, 1000, filters=filters)
         self.assertIn(self.ent2_address1, addresses)
         self.assertIn(self.ent2_address2, addresses)
         self.assertNotIn(self.ent1_address, addresses)
 
-    def test_search_inf_nemployees(self):
-        filters = {"inf_nemployees": models.Enterprise.NEmployees.MEDIUM.value}
-        addresses = ecoliste_research(self.search_location, 1000, filters=filters)
-        self.assertIn(self.ent1_address, addresses)
-        self.assertNotIn(self.ent2_address1, addresses)
-        self.assertNotIn(self.ent2_address2, addresses)
-
-    def test_search_sup_sales(self):
-        filters = {"sup_sales": models.Enterprise.AnnualSales.MEDIUM.value}
+    def test_search_sales(self):
+        filters = {
+            "sales": (
+                models.Enterprise.AnnualSales.MEDIUM.value,
+                models.Enterprise.AnnualSales.BIG,
+            )
+        }
         addresses = ecoliste_research(self.search_location, 1000, filters=filters)
         self.assertIn(self.ent2_address1, addresses)
         self.assertIn(self.ent2_address2, addresses)
         self.assertNotIn(self.ent1_address, addresses)
-
-    def test_search_inf_sales(self):
-        filters = {"inf_sales": models.Enterprise.AnnualSales.MEDIUM.value}
-        addresses = ecoliste_research(self.search_location, 1000, filters=filters)
-        self.assertIn(self.ent1_address, addresses)
-        self.assertNotIn(self.ent2_address1, addresses)
-        self.assertNotIn(self.ent2_address2, addresses)

@@ -4,6 +4,7 @@ from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
 from . import models
+from .views import ecoliste_research
 
 ENTERPRISE_VIEW = "ecoliste:enterprise"
 
@@ -25,6 +26,15 @@ def add_materials_types() -> list[models.MaterialType]:
     bulk.save()
 
     return [slabs, beams, panels, bulk]
+
+
+def add_biobased_origins() -> list[models.BiobasedOriginMaterial]:
+    # Some tests will depend on these. Ok to add, careful when removing or modifying existing.
+    wood = models.BiobasedOriginMaterial(name="Wood")
+    wood.save()
+    cotton = models.BiobasedOriginMaterial(name="Cotton")
+    cotton.save()
+    return [wood, cotton]
 
 
 class EnterpriseViewIdentityTestCase(TestCase):
@@ -279,3 +289,180 @@ class EnterpriseViewMaterialsTestCase(TestCase):
         response = self.client.get(self.url_empty_enterprise)
         for material in self.mat_types:
             self.assertNotContains(response, material.name)
+
+
+class EnterpriseViewContactsTestCase(TestCase):
+    def setUp(self) -> None:
+        self.one_contact = models.Enterprise(name="Enterprise 1")
+        self.one_contact.save()
+        self.multi_contacts = models.Enterprise(name="Enterprise 2")
+        self.multi_contacts.save()
+        self.empty_enterprise = models.Enterprise(name="Empty Enterprise")
+        self.empty_enterprise.save()
+
+        self.url_one_address = reverse(ENTERPRISE_VIEW, args=[self.one_contact.pk])
+        self.url_multi_addresses = reverse(
+            ENTERPRISE_VIEW, args=[self.multi_contacts.pk]
+        )
+        self.url_empty_enterprise = reverse(
+            ENTERPRISE_VIEW, args=[self.empty_enterprise.pk]
+        )
+
+    def test_uses_right_template(self) -> None:
+        pass
+
+
+class SearchFunctionTestCase(TestCase):
+    def setUp(self) -> None:
+        # [0, 0] to [1, 1] ~157km
+        self.search_location = Point([0, 0])
+
+        # Two enterprises to distinguish our results
+        self.enterprise1 = models.Enterprise(
+            name="Enterprise 1",
+            n_employees=models.Enterprise.NEmployees.SMALL,
+            annual_sales=models.Enterprise.AnnualSales.SMALL,
+        )
+        self.enterprise1.save()
+        self.enterprise2 = models.Enterprise(
+            name="Enterprise 2",
+            n_employees=models.Enterprise.NEmployees.BIG,
+            annual_sales=models.Enterprise.AnnualSales.BIG,
+        )
+        self.enterprise2.save()
+
+        # Adding the address for enterprise 1
+        self.ent1_address = models.Address(
+            enterprise=self.enterprise1,
+            text_version="Address for enterprise 1",
+            geolocation=Point([1, 1]),
+            is_production=False,
+        )
+        self.ent1_address.save()
+        # To use for the search to return this address
+        self.search_distance_ent1 = 158
+
+        # Adding addresses to the second enterprise
+        self.ent2_address1 = models.Address(
+            enterprise=self.enterprise2,
+            text_version="Address 1 for enterprise multi",
+            geolocation=Point([2, 2]),
+            is_production=False,
+        )
+        self.ent2_address1.save()
+        self.ent2_address2 = models.Address(
+            enterprise=self.enterprise2,
+            text_version="Address 2 for enterprise multi",
+            geolocation=Point([3, 3]),
+            is_production=False,
+        )
+        self.ent2_address2.save()
+        # To use for the search to return this address
+        self.search_distance_multi1 = 158 * 2
+        self.search_distance_multi2 = 158 * 3
+
+        # Creating some material types and biobased origins
+        self.mat_types = add_materials_types()
+        self.bio_origins = add_biobased_origins()
+
+        # Adding materials to enterprise 1
+        self.ent1_mat1 = models.MaterialByEnterprise(
+            enterprise=self.enterprise1,
+            type=self.mat_types[0],
+            origin=models.MaterialByEnterprise.MaterialOrigins.REUSE,
+        )
+        self.ent1_mat1.save()
+        self.ent1_mat2 = models.MaterialByEnterprise(
+            enterprise=self.enterprise1,
+            type=self.mat_types[1],
+            origin=models.MaterialByEnterprise.MaterialOrigins.BIOBASED,
+        )
+        self.ent1_mat2.save()
+        self.ent1_mat2.biobased_material.add(self.bio_origins[0])
+
+        # Adding materials to enterprise 2
+        self.ent2_mat1 = models.MaterialByEnterprise(
+            enterprise=self.enterprise2,
+            type=self.mat_types[2],
+            origin=models.MaterialByEnterprise.MaterialOrigins.RECYCLED,
+        )
+        self.ent2_mat1.save()
+        self.ent2_mat2 = models.MaterialByEnterprise(
+            enterprise=self.enterprise2,
+            type=self.mat_types[3],
+            origin=models.MaterialByEnterprise.MaterialOrigins.REUSABLE,
+        )
+        self.ent2_mat2.save()
+        self.ent2_mat3 = models.MaterialByEnterprise(
+            enterprise=self.enterprise2,
+            type=self.mat_types[3],
+            origin=models.MaterialByEnterprise.MaterialOrigins.BIOBASED,
+        )
+        self.ent2_mat3.save()
+        self.ent2_mat3.biobased_material.add(self.bio_origins[1])
+
+    def test_search_only_distance(self) -> None:
+        addresses = ecoliste_research(self.search_location, self.search_distance_ent1)
+        self.assertIn(self.ent1_address, addresses)
+
+    def test_search_only_distance_not_other_addresses(self) -> None:
+        addresses = ecoliste_research(self.search_location, self.search_distance_ent1)
+        self.assertNotIn(self.ent2_address1, addresses)
+        self.assertNotIn(self.ent2_address2, addresses)
+
+    def test_search_only_distance_multi_results(self) -> None:
+        addresses = ecoliste_research(self.search_location, self.search_distance_multi1)
+        self.assertIn(self.ent1_address, addresses)
+        self.assertIn(self.ent2_address1, addresses)
+        self.assertNotIn(self.ent2_address2, addresses)
+
+    def test_search_materialtype(self) -> None:
+        # filter = material type from mat1 from enterprise 1
+        filters = {"materials": [self.ent1_mat1.type.id]}
+        addresses = ecoliste_research(self.search_location, 1000, filters=filters)
+        self.assertIn(self.ent1_address, addresses)
+        self.assertNotIn(self.ent2_address1, addresses)
+        self.assertNotIn(self.ent2_address2, addresses)
+
+    def test_search_origin(self) -> None:
+        # filter = material origin from mat1 from enterprise 1
+        filters = {"origin": [self.ent1_mat1.origin]}
+        addresses = ecoliste_research(self.search_location, 1000, filters=filters)
+        self.assertIn(self.ent1_address, addresses)
+        self.assertNotIn(self.ent2_address1, addresses)
+        self.assertNotIn(self.ent2_address2, addresses)
+
+    def test_search_biobased(self) -> None:
+        filters = {"biobased": [self.bio_origins[0].id]}
+        addresses = ecoliste_research(self.search_location, 1000, filters=filters)
+        self.assertIn(self.ent1_address, addresses)
+        self.assertNotIn(self.ent2_address1, addresses)
+        self.assertNotIn(self.ent2_address2, addresses)
+
+    def test_search_sup_nemployees(self):
+        filters = {"sup_nemployees": models.Enterprise.NEmployees.MEDIUM.value}
+        addresses = ecoliste_research(self.search_location, 1000, filters=filters)
+        self.assertIn(self.ent2_address1, addresses)
+        self.assertIn(self.ent2_address2, addresses)
+        self.assertNotIn(self.ent1_address, addresses)
+
+    def test_search_inf_nemployees(self):
+        filters = {"inf_nemployees": models.Enterprise.NEmployees.MEDIUM.value}
+        addresses = ecoliste_research(self.search_location, 1000, filters=filters)
+        self.assertIn(self.ent1_address, addresses)
+        self.assertNotIn(self.ent2_address1, addresses)
+        self.assertNotIn(self.ent2_address2, addresses)
+
+    def test_search_sup_sales(self):
+        filters = {"sup_sales": models.Enterprise.AnnualSales.MEDIUM.value}
+        addresses = ecoliste_research(self.search_location, 1000, filters=filters)
+        self.assertIn(self.ent2_address1, addresses)
+        self.assertIn(self.ent2_address2, addresses)
+        self.assertNotIn(self.ent1_address, addresses)
+
+    def test_search_inf_sales(self):
+        filters = {"inf_sales": models.Enterprise.AnnualSales.MEDIUM.value}
+        addresses = ecoliste_research(self.search_location, 1000, filters=filters)
+        self.assertIn(self.ent1_address, addresses)
+        self.assertNotIn(self.ent2_address1, addresses)
+        self.assertNotIn(self.ent2_address2, addresses)

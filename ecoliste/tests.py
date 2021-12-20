@@ -345,14 +345,14 @@ class SearchFunctionTestCase(TestCase):
         # Adding addresses to the second enterprise
         self.ent2_address1 = models.Address(
             enterprise=self.enterprise2,
-            text_version="Address 1 for enterprise multi",
+            text_version="Address 1 for enterprise 2",
             geolocation=Point([2, 2]),
             is_production=False,
         )
         self.ent2_address1.save()
         self.ent2_address2 = models.Address(
             enterprise=self.enterprise2,
-            text_version="Address 2 for enterprise multi",
+            text_version="Address 2 for enterprise 2",
             geolocation=Point([3, 3]),
             is_production=False,
         )
@@ -400,6 +400,34 @@ class SearchFunctionTestCase(TestCase):
         )
         self.ent2_mat3.save()
         self.ent2_mat3.biobased_material.add(self.bio_origins[1])
+
+        # To use for tests with multiple conditions
+        self.ent3 = models.Enterprise(
+            name="Ent3",
+            annual_sales=models.Enterprise.AnnualSales.MEDIUM,
+            n_employees=models.Enterprise.NEmployees.MEDIUM,
+        )
+        self.ent3.save()
+        self.ent3_address1 = models.Address(
+            enterprise=self.ent3,
+            text_version="Ent3 addr1",
+            geolocation=Point([-2, 2]),
+            is_production=True,
+        )
+        self.ent3_address1.save()
+        self.ent3_addr2 = models.Address(
+            enterprise=self.ent3,
+            text_version="Ent3 addr1",
+            geolocation=Point([-3, 3]),
+            is_production=False,
+        )
+        self.ent3_addr2.save()
+        self.ent3_mat1 = models.MaterialByEnterprise(
+            enterprise=self.ent3,
+            type=self.mat_types[0],
+            origin=models.MaterialByEnterprise.MaterialOrigins.RECYCLED,
+        )
+        self.ent3_mat1.save()
 
     def test_search_only_distance(self) -> None:
         addresses = ecoliste_research(self.search_location, self.search_distance_ent1)
@@ -462,3 +490,16 @@ class SearchFunctionTestCase(TestCase):
         self.assertIn(self.ent2_address1, addresses)
         self.assertIn(self.ent2_address2, addresses)
         self.assertNotIn(self.ent1_address, addresses)
+
+    def test_search_multiple_conditions(self):
+        filters = {
+            "materials": [self.mat_types[0].id, self.mat_types[2].id],
+            "origin": [models.MaterialByEnterprise.MaterialOrigins.RECYCLED],
+            "nemployees": (models.Enterprise.NEmployees.MEDIUM.value,
+                models.Enterprise.NEmployees.BIG.value,)
+        }
+        addresses = ecoliste_research(self.search_location, 158 * 2, filters=filters)
+        self.assertIn(self.ent3_address1, addresses)
+        self.assertIn(self.ent2_address1, addresses)
+        self.assertNotIn(self.ent1_address, addresses)
+        self.assertNotIn(self.ent2_address2, addresses)
